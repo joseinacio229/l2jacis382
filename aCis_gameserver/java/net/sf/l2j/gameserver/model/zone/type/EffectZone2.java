@@ -13,6 +13,7 @@ import net.sf.l2j.gameserver.model.actor.Creature;
 import net.sf.l2j.gameserver.model.actor.Player;
 import net.sf.l2j.gameserver.model.holder.IntIntHolder;
 import net.sf.l2j.gameserver.model.zone.ZoneType;
+import net.sf.l2j.gameserver.network.SystemMessageId;
 import net.sf.l2j.gameserver.network.serverpackets.EtcStatusUpdate;
 
 /**
@@ -24,9 +25,12 @@ public class EffectZone2 extends ZoneType
 {
 	private final List<IntIntHolder> _skills = new ArrayList<>(5);
 	
+	
 	private int _chance = 100;
 	private int _initialDelay = 0;
 	private int _reuseDelay = 30000;
+    private int requiredItemId; // ID do item necessário para entrar na zona
+
 	
 	private boolean _isEnabled = true;
 	
@@ -36,6 +40,10 @@ public class EffectZone2 extends ZoneType
 	public EffectZone2(int id)
 	{
 		super(id);
+	}
+	public EffectZone2(int id, int requiredItemId) {
+	    super(id);
+	    this.requiredItemId = requiredItemId;
 	}
 	
 	@Override
@@ -154,5 +162,12 @@ public class EffectZone2 extends ZoneType
 	public void editStatus(boolean state)
 	{
 		_isEnabled = state;
+	}
+	public boolean canTeleport(Player player) {
+		if (requiredItemId > 0 && player.getInventory().getItemByItemId(requiredItemId) == null) {
+	        player.sendPacket(SystemMessageId.S1_DOES_NOT_EXIST2);
+	        return false;
+	    }
+	    return true;
 	}
 }
